@@ -75,6 +75,11 @@
           document.getElementById('list').innerHTML += '<li><b>'+key+'. '+items[key]+'</b><span>$'+price[key]+'</span></li>';
         }
 
+
+        // The most interesting concept of JS - is to show different views without page reload
+        // The most surprising patch - is how many actions with styling we need to do to set everything properly.
+
+
         // create buttons objects
         let addToCart = document.getElementById("b0"),
             back = document.getElementById("b1"),
