@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Joe's Hotdogs</title>
+    <style>
+        body {
+            background-color: #FAEBD7FF;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            margin-right: 50px;
+        }
+        ol {
+            background-color: #DEB887FF;
+            outline-style: double;
+            outline-color: #000000FF;
+            outline-width: 4px;
+            line-height: 4;
+        }
+        .menu,.cart {
+            margin: auto;
+            width: 700px;
+            height: 200px;
+        }
+        h3 {
+            height: 50px;
+            text-align: center;
+        }
+        #b4 {
+            display: flex;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            text-align: left;
+            justify-content: space-between;
+        }
+        footer {
+            display: flex;
+            justify-content: space-around;
+        }
+    </style>
+    <script>
+      window.addEventListener('DOMContentLoaded', function(){
+
+        const items = {
+          1: "Hotdog",
+          2: "Fries",
+          3: "Soda",
+          4: "Sauerkraut"
+        }
+        const price = {
+          1: 4,
+          2: 3.50,
+          3: 1.50,
+          4: 1
+        }
+        const tax = 0.0625;
+
+        let order = {},
+            qty = 0,
+            orderTotal = 0,
+            itemPrice = 0,
+            itemNumber = 0,
+            taxes = 0;
+
+        // generate buttons
+        const buttons = ['Add to Cart', 'Back', 'Place Order', 'Cancel Order'];
+        buttons.forEach((item, index)=> {
+          document.getElementById('footer').innerHTML += '<button id=b'+index+' style="display: none">'+item+'</button>';
+        })
+        // generate item list
+        for (let key in items) {
+          document.getElementById('list').innerHTML += '<li><b>'+key+'. '+items[key]+'</b><span>$'+price[key]+'</span></li>';
+        }
+
+        // create buttons objects
+        let addToCart = document.getElementById("b0"),
+            back = document.getElementById("b1"),
+            placeOrder = document.getElementById("b2"),
+            cancelOrder = document.getElementById("b3"),
+            cartButton = document.getElementById("b4");
+
+        // prompt appears after click on Add to Cart button
+        addToCart.style.display = 'block';
+        addToCart.addEventListener('click', function (){
+          do {
+            itemNumber = parseInt(prompt("Please enter item number", "1"));
+          } while(isNaN(itemNumber) || itemNumber < 1 || itemNumber > 4);
+
+          do {
+            qty = parseInt(prompt("Please enter qty", "1"));
+          } while(isNaN(qty) || qty < 1);
+
+          // Add items qty to cart button
+          if (qty && itemNumber) {
+            if (order[itemNumber]) {
+              order[itemNumber] += qty;
+            } else {
+              order[itemNumber] = qty;
+            }
+            cancelOrder.style.display = 'block'; // show Cancel button
+            // Add items qty to cart button
+            let qtyOld = cartButton.lastElementChild ? cartButton.lastElementChild.innerHTML : 0;
+            qty = qty + parseInt(qtyOld);
+            document.getElementById("b4").innerHTML = 'Cart <span>'+qty+'</span>';
+          }
+
+          // Add calculations of total and taxes
+          orderTotal = 0;
+          taxes = 0;
+          for (let key in order) {
+            // item price = (price) * (items qty) from order obj
+            itemPrice = price[key] * order[key];
+            orderTotal += itemPrice;
+          }
+          // apply discount before tax
+          orderTotal = orderTotal > 20 ? orderTotal * 0.9 : orderTotal;
+
+          // add taxes
+          taxes = orderTotal*tax;
+          orderTotal = orderTotal + taxes;
+        })
+
+        // create a cart page view with buttons "cancel" and "place order". Order selection and order qty
+        cartButton.addEventListener('click', function (){
+          document.getElementById('cartList').innerHTML = '';
+          document.getElementById('cartList').innerHTML = '<li><b>Item</b><b>Qty</b><b>Price</b></li>';
+          document.getElementById('cartList').hidden = false; //show cart items
+          document.getElementById('list').style.display = 'none'; // hide menu list
+          for (let key in order) {
+            document.getElementById('cartList').innerHTML += '<li><b>'+items[key]+'</b><b>'+order[key]+'</b><span>$'+price[key]+'</span></li>';
+          }
+          document.getElementById('cartList').innerHTML += '<li><b>  </b><b> </b><b>Taxes:  '+100 * tax+'% ($'+taxes.toFixed(2)+')</b></li>';
+          document.getElementById('cartList').innerHTML += '<li><b>  </b><b> </b><b>Total:  $'+orderTotal.toFixed(2)+'</b></li>';
+          cartButton.style.display = "none";
+          addToCart.style.display = "none";
+          back.style.display = 'block';
+          placeOrder.style.display = 'block';
+          cancelOrder.style.display = 'block';
+
+          back.addEventListener('click', goBack)
+        })
+
+        cancelOrder.addEventListener('click', cancel)
+
+        // place order : Display order confirmation, reset all items
+        placeOrder.addEventListener('click', function () {
+          if (Object.keys(order).length !== 0) {
+            cartButton.style.display = "none";
+            addToCart.style.display = "none";
+            back.style.display = 'block';
+            placeOrder.style.display = 'none';
+            cancelOrder.style.display = 'none';
+            document.getElementById('cartList').hidden = true;
+            document.getElementById('span1').innerHTML = '<b>Order was placed successfully <br> You will be redirected back to Menu in 3 sec</b>';
+            document.getElementById('span1').style.display = 'block';
+            order = {};
+            orderTotal = 0;
+            taxes = 0;
+            document.getElementById("b4").innerHTML = 'Cart ';
+            setTimeout(goBack, 3000);
+          } else {
+            alert('You have no items in your cart');
+          }
+        })
+
+        // go back to items list
+        function goBack() {
+          document.getElementById('cartList').hidden = true; // hide cart items
+          document.getElementById('list').style.display = "block"; // show menu
+          cartButton.style.display = "flex";
+          addToCart.style.display = "block";
+          back.style.display = 'none';
+          placeOrder.style.display = 'none';
+          if (Object.keys(order).length === 0) {
+            cancelOrder.style.display = 'none';
+          } else {
+            cancelOrder.style.display = 'block';
+          }
+          document.getElementById('span1').style.display = 'none';
+        }
+
+        // cancel order :remove all items from cart list and cart button
+        function cancel() {
+          order = {};
+          orderTotal = 0;
+          taxes = 0;
+          document.getElementById("b4").innerHTML = 'Cart ';
+          goBack();
+        }
+      })
+    </script>
+</head>
+<body>
+<div class="menu" id="menu">
+    <h3>Joe's Hotdogs</h3>
+    <span id="span1" style="align-content: center; text-align: center; line-height: 100px"></span>
+    <button id="b4">Cart </button>
+    <ol id="list">
+    </ol>
+    <ol id="cartList" hidden>
+    </ol>
+    <footer id="footer">
+    </footer>
+</div>
+<div class="cart" id="cart" style="display: none">
+</div>
+</body>
+</html>
